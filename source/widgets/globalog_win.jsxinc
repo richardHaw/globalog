@@ -30,23 +30,24 @@ const LOGGER_TIT = "Globalog Viewer";
 // var WINTYPE = "dialog";
 var WINTYPE = "palette";
 
+
 function GlobaLogWin(){
     /*
     finds or create a new logger
     */
 
-    GLOBALOG_WIN =  CreateViewer(); // for testing only
+    // GLOBALOG_WIN =  CreateViewer(); // for testing only
 
-    // const old_logger = Window.find(WINTYPE, LOGGER_TIT);
-    // if (old_logger === null || old_logger === undefined){
-        // GLOBALOG_WIN = CreateViewer();
-    // }
-    // else {
-        // GLOBALOG_WIN = old_logger;
-        // GLOBALOG_WIN.multiline.text = "";
-    // }
+    const old_logger = Window.find(WINTYPE, LOGGER_TIT);
+    if (old_logger === null || old_logger === undefined){
+        GLOBALOG_WIN = CreateViewer();
+    }
+    else {
+        GLOBALOG_WIN = old_logger;
+        GLOBALOG_WIN.multiline.text = "";
+    }
 
-    // GLOBALOG_WIN.show();
+    GLOBALOG_WIN.show();
 }
 $.global.GlobaLogWin = GlobaLogWin;
 
