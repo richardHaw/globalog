@@ -32,7 +32,8 @@ function GlobaLogWin(){
     /*
     finds or create a new logger
     */
-        GLOBALOG_WIN =  CreateViewer();
+
+    GLOBALOG_WIN =  CreateViewer(); // for testing only
 
     // const old_logger = Window.find("palette",LOGGER_TIT);
     // if (old_logger === null || old_logger === undefined){
@@ -65,6 +66,7 @@ function CreateViewer(){
     win.alignment = ["fill","fill"];
     win.spacing = 5;
     win.margin = 5;
+    win.buffer = new Array();
 
     win.init_width = 300;
     win.init_height = 100;
@@ -79,10 +81,20 @@ function CreateViewer(){
     }
 
     win.onShow = function(){
-        init_width = this.size.width;
-        init_height = this.size.height;
+        this.init_width = this.size.width;
+        this.init_height = this.size.height;
         this.minimumSize = this.size;
         this.layout.resize();
+    }
+
+    win.populate = function(buffer_array){
+        this.multiline.text = "";
+        var new_text = "";
+        for (var b = 0; b < buffer_array.length; b++){
+            new_text += buffer_array[b] + "\n";
+        }
+        this.multiline.text = new_text;
+        this.buffer = buffer_array;
     }
 
     // multiline
@@ -94,7 +106,7 @@ function CreateViewer(){
                             readonly:true})
 
     win.multiline.alignment = ["fill", "fill"];
-    win.multiline.minimumSize = [800,400];
+    win.multiline.minimumSize = [600,400];
     win.multiline.active = true;
 
     // bottom
@@ -105,7 +117,7 @@ function CreateViewer(){
     win.bottom.margin = 2;
 
     // buttons
-    const btn_names = ["None","Debug","Warning","Error","Critical"];
+    const btn_names = ["Show All","Debug","Info","Warning","Error","Critical"];
     win.buttons = new Array();
     for (var b = 0; b < btn_names.length; b++){
         var btn = win.bottom.add("button");
@@ -116,7 +128,38 @@ function CreateViewer(){
         btn.maximumSize = [55,25];
 
         btn.onClick = function(){
-            $.writeln(this.text);
+            function FilterLines(keyw, buff_array){
+                const filtered = new Array();
+                for (var k = 0; k < buff_array.length; k++){
+                    if (buff_array[k].indexOf(keyw) != -1){
+                        filtered.push(buff_array[k]);
+                    }
+                }
+                return filtered;
+            }
+
+            var new_contents = "";
+            switch(this.text){
+                case btn_names[0]:
+                    new_contents = this.window.buffer.join("\n");
+                    break;
+                case btn_names[1]:
+                    new_contents = FilterLines("DBUG",this.window.buffer).join("\n");
+                    break;
+                case btn_names[2]:
+                    new_contents = FilterLines("INFO",this.window.buffer).join("\n");
+                    break;
+                case btn_names[3]:
+                    new_contents = FilterLines("WARN",this.window.buffer).join("\n");
+                    break;
+                case btn_names[4]:
+                    new_contents = FilterLines("EROR",this.window.buffer).join("\n");
+                    break;
+                case btn_names[5]:
+                    new_contents = FilterLines("CRIT",this.window.buffer).join("\n");
+                    break;
+            }
+            this.window.multiline.text = new_contents;
         }
 
         win.buttons.push(btn);
