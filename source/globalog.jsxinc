@@ -94,6 +94,16 @@ GlobaLog.prototype.log = function(msg,mlev){
 }
 
 
+GlobaLog.prototype.writeSep = function(){
+    if (this.printout){
+        $.writeln(this.separator);
+    }
+    this.buffer.push(this.separator);
+
+    this.writeToFile(this.separator);
+}
+
+
 GlobaLog.prototype.writeToFile = function(msg){
     if (this.handlerFile === undefined || this.handlerFile === null){
         return "Handler not specified...";

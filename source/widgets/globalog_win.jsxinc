@@ -208,6 +208,19 @@ function CreateViewer(){
     win.open_btn.minimumSize = [90, 25];
     win.open_btn.maximumSize = [90, 25];
 
+    win.open_btn.onClick = function(){
+        const getf = File.openDialog("Select a .txt file", "*txt", false);
+        if (! getf){
+            return;
+        }
+
+        getf.open("r");
+        const read_contents = getf.read();
+        getf.close();
+        this.window.multiline.text = read_contents;
+        this.window.buffer = read_contents.split("\n");
+    }
+
     // done
     return win;
 }
