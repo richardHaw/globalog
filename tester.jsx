@@ -1,5 +1,5 @@
 // @include"source/globalog.jsxinc";
-// @include"source/widgets/globalog_win.jsxinc";
+// @include"source/globalog_win.jsxinc";
 
 
 //~ var betlog = CreateGlobaLog(Folder.myDocuments.fsName.split("\\").join("/") + "/xxx.txt");
