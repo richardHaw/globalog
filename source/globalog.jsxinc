@@ -95,6 +95,10 @@ GlobaLog.prototype.log = function(msg,mlev){
 
 
 GlobaLog.prototype.writeSep = function(){
+    /*
+    writes a long separator without datestamp
+    */
+
     if (this.printout){
         $.writeln(this.separator);
     }
@@ -105,6 +109,10 @@ GlobaLog.prototype.writeSep = function(){
 
 
 GlobaLog.prototype.writeToFile = function(msg){
+    /*
+    this is best treated as private but you can use this too.
+    */
+
     if (this.handlerFile === undefined || this.handlerFile === null){
         return "Handler not specified...";
     }
@@ -123,6 +131,10 @@ GlobaLog.prototype.writeToFile = function(msg){
 
 
 GlobaLog.prototype.setLevel = function(lev_int){
+    /*
+    sets the log level, similar to Python's logger module
+    */
+
     if (! lev_int instanceof Number){
         throw new Error("Log level must be Number...");
     }
@@ -145,11 +157,21 @@ GlobaLog.prototype.setLevel = function(lev_int){
 
 
 GlobaLog.prototype.clearBuffer = function(){
+    /*
+    clears the buffer, for advanced use only.
+    usually treated as private
+    */
+
     this.buffer = new Array();
 }
 
 
-GlobaLog.prototype.print = function(pvar){
+GlobaLog.prototype.consoleLog = function(pvar){
+    /*
+    set to true if you want to log out to ESTK
+    useful for real-time debugging
+    */
+
     if (! pvar instanceof Boolean){
         throw new Error("Print value should be Boolean: " + String(pvar));
     }
@@ -158,6 +180,11 @@ GlobaLog.prototype.print = function(pvar){
 
 
 GlobaLog.prototype.getTime = function(pathsafe){
+    /*
+    private function for datestamp
+    can also be used for getting path-friendly datestamp if you want
+    */
+
     var pathsafe = (pathsafe !== undefined) ? pathsafe : false;
 
     const date = new Date();
@@ -178,11 +205,15 @@ GlobaLog.prototype.getTime = function(pathsafe){
 }
 
 
-GlobaLog.prototype.charFill = function(orig_item,num_zeros,pad_ch){
+GlobaLog.prototype.charFill = function(orig_str,num_zeros,pad_ch){
+    /*
+    like Python's zfill but more powerful
+    */
+
     var num_zeros = (num_zeros !== undefined) ? num_zeros : 2;
     var pad_ch = (pad_ch !== undefined) ? pad_ch : "0";
 
-    var padded_str = orig_item.toString();
+    var padded_str = orig_str.toString();
     while (padded_str.length < num_zeros){
         padded_str = pad_ch + padded_str;
     }
@@ -193,7 +224,9 @@ GlobaLog.prototype.charFill = function(orig_item,num_zeros,pad_ch){
 
 function CreateGlobaLog(path){
     /*
-    factory
+    factory, public
+    used for creating and initializing the logger
+    path is optional, no path means no file handling
     */
 
     const log_obj = new GlobaLog();

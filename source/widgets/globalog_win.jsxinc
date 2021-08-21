@@ -31,9 +31,10 @@ const LOGGER_TIT = "Globalog Viewer";
 var WINTYPE = "palette";
 
 
-function GlobaLogWin(){
+function GlobalLogWinInit(){
     /*
     finds or create a new logger
+    returns the current instance
     */
 
     // GLOBALOG_WIN =  CreateViewer(); // for testing only
@@ -48,11 +49,17 @@ function GlobaLogWin(){
     }
 
     GLOBALOG_WIN.show();
+    return GLOBALOG_WIN;
 }
-$.global.GlobaLogWin = GlobaLogWin;
+$.global.GlobalLogWinInit = GlobalLogWinInit;
 
 
 function CreateViewer(){
+    /*
+    private, creates a new viewer instance
+    you can use this to create multiple instances if you want
+    */
+
     const contructor = {resizeable:true,
                         closeButton:true,
                         minimizeButton:false,

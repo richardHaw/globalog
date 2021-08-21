@@ -2,10 +2,11 @@
 // @include"source/widgets/globalog_win.jsxinc";
 
 
-var betlog = CreateGlobaLog(Folder.myDocuments.fsName.split("\\").join("/") + "/xxx.txt");
+//~ var betlog = CreateGlobaLog(Folder.myDocuments.fsName.split("\\").join("/") + "/xxx.txt");
+var betlog = CreateGlobaLog();
 betlog.log("ddd",3);
 betlog.log("");
-//~ betlog.print(true);
+//~ betlog.consoleLog(true);
 
 betlog.log("isko",1);
 betlog.log("kalabaw",0);
@@ -24,5 +25,5 @@ betlog.log("cheetaeh");
 betlog.log("ungga");
 betlog.log(betlog.getTime(true));
 
-GlobaLogWin();
+GlobalLogWinInit();
 GLOBALOG_WIN.populate(betlog.buffer);
