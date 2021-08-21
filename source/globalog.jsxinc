@@ -1,0 +1,123 @@
+/*
+MIT License
+
+Copyright (c) 2021 richardHaw
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+(function(){
+
+function GlobaLog(){
+    /*
+    levels:
+            0 DBUG
+            1 INFO
+            2 WARN
+            3 EROR
+            4 CRIT
+    */
+
+    this.level = 1;
+    this.levelStr = "INFO";
+    this.handler = null;
+    this.message = "-";
+    this.div = this.charFill("",88,"-");
+    this.printout = false;
+}
+$.global.GlobaLog = GlobaLog;
+
+
+GlobaLog.prototype.write = function(msg,mlev){
+    var msg = (msg !== undefined) ? msg : "";
+    var mlev = (mlev !== undefined) ? mlev : this.level;
+
+    const orig_level = this.level;
+    if (mlev != orig_level){
+        this.setLevel(mlev);
+    }
+
+    const force_str = String(msg);
+    const full_msg = this.levelStr + this.getTime() + force_str;
+
+    if (this.printout){
+        $.writeln(full_msg);
+    }
+
+    this.setLevel(orig_level);
+}
+
+
+GlobaLog.prototype.setLevel = function(lev_int){
+    if (! lev_int instanceof Number){
+        throw new Error("Log level must be Number...");
+    }
+
+    if (lev_int < 0 || lev_int > 4){
+        throw new Error("Log level must be between 0 and 4: " + lev_int.toString());
+    }
+
+    const force_int = Math.floor(lev_int);
+
+    const levels = ["DBUG",
+                    "INFO",
+                    "WARN",
+                    "EROR",
+                    "CRIT"];
+
+    this.level = force_int;
+    this.levelStr = levels[force_int];
+}
+
+
+GlobaLog.prototype.print = function(pvar){
+    if (! pvar instanceof Boolean){
+        throw new Error("Print value should be Boolean: " + String(pvar));
+    }
+    this.printout = pvar;
+}
+
+
+GlobaLog.prototype.getTime = function(){
+    const date = new Date();
+
+    var out = " - " + date.getFullYear() + "/";
+    out += this.charFill(date.getMonth() + 1,2) + "/";
+    out += this.charFill(date.getDate(),2) + " ";
+    out += this.charFill(date.getHours(),2) + ":";
+    out += this.charFill(date.getMinutes(),2) + ":";
+    out += this.charFill(date.getSeconds(),2) + " ";
+    return out;
+}
+
+
+GlobaLog.prototype.charFill = function(orig_item,num_zeros,pad_ch){
+    var num_zeros = (num_zeros !== undefined) ? num_zeros : 2;
+    var pad_ch = (pad_ch !== undefined) ? pad_ch : "0";
+
+    var padded_str = orig_item.toString();
+    while (padded_str.length < num_zeros){
+        padded_str = pad_ch + padded_str;
+    }
+
+    return padded_str;
+}
+
+
+})();
