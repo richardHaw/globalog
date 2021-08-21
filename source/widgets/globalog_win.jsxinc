@@ -27,6 +27,8 @@ SOFTWARE.
 
 $.global.GLOBALOG_WIN = undefined;
 const LOGGER_TIT = "Globalog Viewer";
+// var WINTYPE = "dialog";
+var WINTYPE = "palette";
 
 function GlobaLogWin(){
     /*
@@ -35,16 +37,16 @@ function GlobaLogWin(){
 
     GLOBALOG_WIN =  CreateViewer(); // for testing only
 
-    // const old_logger = Window.find("palette",LOGGER_TIT);
+    // const old_logger = Window.find(WINTYPE, LOGGER_TIT);
     // if (old_logger === null || old_logger === undefined){
-        // GLOBALOG_WIN =  CreateViewer();
+        // GLOBALOG_WIN = CreateViewer();
     // }
     // else {
         // GLOBALOG_WIN = old_logger;
         // GLOBALOG_WIN.multiline.text = "";
     // }
 
-    GLOBALOG_WIN.show();
+    // GLOBALOG_WIN.show();
 }
 $.global.GlobaLogWin = GlobaLogWin;
 
@@ -58,14 +60,15 @@ function CreateViewer(){
                         independent:false}
 
     // window
-    const win = new Window("palette", "", undefined, contructor);
+    const win = new Window(WINTYPE, "", undefined, contructor);
     win.text = LOGGER_TIT;
     win.name = "GLOBALOG_WIN";
     win.orientation = "column";
-    win.alignChildren = ["top","fill"];
-    win.alignment = ["fill","fill"];
+    win.alignChildren = ["top", "fill"];
+    win.alignment = ["fill", "fill"];
     win.spacing = 5;
     win.margin = 5;
+    win.indented = true;
     win.buffer = new Array();
 
     win.init_width = 300;
@@ -106,7 +109,7 @@ function CreateViewer(){
                             readonly:true})
 
     win.multiline.alignment = ["fill", "fill"];
-    win.multiline.minimumSize = [600,400];
+    win.multiline.minimumSize = [400, 400];
     win.multiline.active = true;
 
     // bottom
@@ -117,46 +120,59 @@ function CreateViewer(){
     win.bottom.margin = 2;
 
     // buttons
-    const btn_names = ["Show All","Debug","Info","Warning","Error","Critical"];
+    const btn_names = ["Reset", "Debug", "Info", "Warning", "Error", "Critical"];
     win.buttons = new Array();
     for (var b = 0; b < btn_names.length; b++){
         var btn = win.bottom.add("button");
         btn.name = btn_names[b] + "_btn";
         btn.text = btn_names[b];
         btn.alignment = ["left", "bottom"];
-        btn.minimumSize = [55,25];
-        btn.maximumSize = [55,25];
+        btn.minimumSize = [55, 25];
+        btn.maximumSize = [55, 25];
 
         btn.onClick = function(){
-            function FilterLines(keyw, buff_array){
+            function FilterLines(keyw, buff_array, is_indented){
                 const filtered = new Array();
-                for (var k = 0; k < buff_array.length; k++){
-                    if (buff_array[k].indexOf(keyw) != -1){
-                        filtered.push(buff_array[k]);
+                const blimit = buff_array.length;
+                for (var k = 0; k < blimit; k++){
+                    var bline = buff_array[k];
+                    if (bline.indexOf(keyw) != -1){
+                        filtered.push(bline);
+                    }
+                    else {
+                        if (! is_indented){
+                            continue;
+                        }
+                        else {
+                            filtered.push("            " + bline);
+                        }
                     }
                 }
                 return filtered;
             }
 
+            const orig_buffer = this.window.buffer;
+            const indented = this.window.indented;
+
             var new_contents = "";
             switch(this.text){
                 case btn_names[0]:
-                    new_contents = this.window.buffer.join("\n");
+                    new_contents = orig_buffer.join("\n");
                     break;
                 case btn_names[1]:
-                    new_contents = FilterLines("DBUG",this.window.buffer).join("\n");
+                    new_contents = FilterLines("DBUG", orig_buffer, indented).join("\n");
                     break;
                 case btn_names[2]:
-                    new_contents = FilterLines("INFO",this.window.buffer).join("\n");
+                    new_contents = FilterLines("INFO", orig_buffer, indented).join("\n");
                     break;
                 case btn_names[3]:
-                    new_contents = FilterLines("WARN",this.window.buffer).join("\n");
+                    new_contents = FilterLines("WARN", orig_buffer, indented).join("\n");
                     break;
                 case btn_names[4]:
-                    new_contents = FilterLines("EROR",this.window.buffer).join("\n");
+                    new_contents = FilterLines("EROR", orig_buffer, indented).join("\n");
                     break;
                 case btn_names[5]:
-                    new_contents = FilterLines("CRIT",this.window.buffer).join("\n");
+                    new_contents = FilterLines("CRIT", orig_buffer, indented).join("\n");
                     break;
             }
             this.window.multiline.text = new_contents;
@@ -165,13 +181,24 @@ function CreateViewer(){
         win.buttons.push(btn);
     }
 
+    win.spacer = win.bottom.add("group");
+    win.spacer.minimumSize = [15, 25];
+
+    win.chk = win.bottom.add("checkbox", undefined, "Indented");
+    win.chk.value = win.indented;
+    win.chk.alignment = ["left", "bottom"];
+
+    win.chk.onClick = function(){
+        this.window.indented = this.value;
+    }
+
     // open button
     win.open_btn = win.bottom.add("button");
     win.open_btn.name = "open_btn";
     win.open_btn.text = "Open Log File";
     win.open_btn.alignment = ["right", "bottom"];
-    win.open_btn.minimumSize = [90,25];
-    win.open_btn.maximumSize = [90,25];
+    win.open_btn.minimumSize = [90, 25];
+    win.open_btn.maximumSize = [90, 25];
 
     // done
     return win;

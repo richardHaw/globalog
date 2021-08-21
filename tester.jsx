@@ -12,9 +12,18 @@ betlog.log(betlog.separator);
 betlog.setLevel(4);
 betlog.log("palitaw");
 betlog.log("ppp");
-betlog.log("clit");
+betlog.log("dangerous");
+betlog.log(betlog.getTime(true));
+
+betlog.log("tito",1);
+betlog.log("vice",0);
+betlog.log("joey");
+betlog.log("eat bulaga");
+betlog.log("cheetaeh");
+betlog.log("ungga");
 betlog.log(betlog.getTime(true));
 
 
 GlobaLogWin();
 GLOBALOG_WIN.populate(betlog.buffer);
+GLOBALOG_WIN.show();
