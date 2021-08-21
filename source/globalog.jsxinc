@@ -27,6 +27,10 @@ SOFTWARE.
 
 function GlobaLog(){
     /*
+    creates a new GlobaLog Object
+    best treated as private
+    invoke using CreateGlobaLog
+
     levels:
             0 DBUG
             1 INFO
@@ -42,38 +46,17 @@ function GlobaLog(){
     this.levelStr = "INFO";
     this.handler = null;
     this.message = "-";
-    this.separator = this.charFill("",88,"-");
+    this.separator = this._charFill("",88,"-");
     this.printout = false;
 }
 $.global.GlobaLog = GlobaLog;
 
 
-GlobaLog.prototype.initHandler = function(hpath){
-    if (! hpath instanceof String){
-        throw new Error("Handler path must be text:" + String(hpath));
-    }
-
-    const hfile = new File(hpath);
-    if (! hfile.parent.exists){
-        hfile.parent.create();
-    }
-
-    if (! hfile.parent.exists){
-        throw new Error("Failed to create folder: " + hfile.parent.fsName);
-    }
-
-    this.handlerFile = hfile;
-    this.handlerPath = this.handlerFile.fsName;
-    this.clearBuffer();
-
-    this.writeToFile("");
-    this.writeToFile(this.separator);
-    this.writeToFile("Log Created at " + this.getTime());
-    return this.handlerFile;
-}
-
-
 GlobaLog.prototype.log = function(msg,mlev){
+    /*
+    main interface function for logging
+    */
+
     var msg = (msg !== undefined) ? msg : "";
     var mlev = (mlev !== undefined) ? mlev : this.level;
 
@@ -83,14 +66,14 @@ GlobaLog.prototype.log = function(msg,mlev){
     }
 
     const force_str = String(msg);
-    const full_msg = this.levelStr + " - " + this.getTime() + " " + force_str;
+    const full_msg = this.levelStr + " - " + this._getTime() + " " + force_str;
     this.setLevel(orig_level);
 
     if (this.printout){
         $.writeln(full_msg);
     }
     this.buffer.push(full_msg);
-    this.writeToFile(full_msg);
+    this._writeToFile(full_msg);
 }
 
 
@@ -104,29 +87,7 @@ GlobaLog.prototype.writeSep = function(){
     }
     this.buffer.push(this.separator);
 
-    this.writeToFile(this.separator);
-}
-
-
-GlobaLog.prototype.writeToFile = function(msg){
-    /*
-    this is best treated as private but you can use this too.
-    */
-
-    if (this.handlerFile === undefined || this.handlerFile === null){
-        return "Handler not specified...";
-    }
-
-    try {
-        this.handlerFile.open("a+");
-        this.handlerFile.encoding = "UTF-8";
-        this.handlerFile.lineFeed = "Windows";
-        this.handlerFile.writeln(msg);
-        this.handlerFile.close();
-    }
-    catch(e){
-        throw new Error("Write failed: " + e.message);
-    }
+    this._writeToFile(this.separator);
 }
 
 
@@ -156,17 +117,7 @@ GlobaLog.prototype.setLevel = function(lev_int){
 }
 
 
-GlobaLog.prototype.clearBuffer = function(){
-    /*
-    clears the buffer, for advanced use only.
-    usually treated as private
-    */
-
-    this.buffer = new Array();
-}
-
-
-GlobaLog.prototype.consoleLog = function(pvar){
+GlobaLog.prototype.setConsoleLog = function(pvar){
     /*
     set to true if you want to log out to ESTK
     useful for real-time debugging
@@ -179,7 +130,7 @@ GlobaLog.prototype.consoleLog = function(pvar){
 }
 
 
-GlobaLog.prototype.getTime = function(pathsafe){
+GlobaLog.prototype._getTime = function(pathsafe){
     /*
     private function for datestamp
     can also be used for getting path-friendly datestamp if you want
@@ -190,11 +141,11 @@ GlobaLog.prototype.getTime = function(pathsafe){
     const date = new Date();
 
     var out = date.getFullYear() + "/";
-    out += this.charFill(date.getMonth() + 1,2) + "/";
-    out += this.charFill(date.getDate(),2) + " ";
-    out += this.charFill(date.getHours(),2) + ":";
-    out += this.charFill(date.getMinutes(),2) + ":";
-    out += this.charFill(date.getSeconds(),2);
+    out += this._charFill(date.getMonth() + 1,2) + "/";
+    out += this._charFill(date.getDate(),2) + " ";
+    out += this._charFill(date.getHours(),2) + ":";
+    out += this._charFill(date.getMinutes(),2) + ":";
+    out += this._charFill(date.getSeconds(),2);
 
     if (pathsafe === true){
         return out.replace(/ /g,"_").replace(/:/g,"_").replace(/\//g,"_");
@@ -205,8 +156,71 @@ GlobaLog.prototype.getTime = function(pathsafe){
 }
 
 
-GlobaLog.prototype.charFill = function(orig_str,num_zeros,pad_ch){
+GlobaLog.prototype._writeToFile = function(msg){
     /*
+    this is best treated as private but you can use this too.
+    */
+
+    if (this.handlerFile === undefined || this.handlerFile === null){
+        return "Handler not specified...";
+    }
+
+    try {
+        this.handlerFile.open("a+");
+        this.handlerFile.encoding = "UTF-8";
+        this.handlerFile.lineFeed = "Windows";
+        this.handlerFile.writeln(msg);
+        this.handlerFile.close();
+    }
+    catch(e){
+        throw new Error("Write failed: " + e.message);
+    }
+}
+
+
+GlobaLog.prototype._initHandler = function(hpath){
+    /*
+    used for setting up file handling
+    best treated as private
+    */
+
+    if (! hpath instanceof String){
+        throw new Error("Handler path must be text:" + String(hpath));
+    }
+
+    const hfile = new File(hpath);
+    if (! hfile.parent.exists){
+        hfile.parent.create();
+    }
+
+    if (! hfile.parent.exists){
+        throw new Error("Failed to create folder: " + hfile.parent.fsName);
+    }
+
+    this.handlerFile = hfile;
+    this.handlerPath = this.handlerFile.fsName;
+    this._clearBuffer();
+
+    this._writeToFile("");
+    this._writeToFile(this.separator);
+    this._writeToFile("Log Created at " + this._getTime());
+    return this.handlerFile;
+}
+
+
+GlobaLog.prototype._clearBuffer = function(){
+    /*
+    clears the buffer, for advanced use only.
+    usually treated as private
+    */
+
+    this.buffer = new Array();
+}
+
+
+GlobaLog.prototype._charFill = function(orig_str,num_zeros,pad_ch){
+    /*
+    private
     like Python's zfill but more powerful
     */
 
@@ -231,7 +245,7 @@ function CreateGlobaLog(path){
 
     const log_obj = new GlobaLog();
     if (path !== null && path !== undefined){
-        log_obj.initHandler(path);
+        log_obj._initHandler(path);
     }
     return log_obj;
 }
