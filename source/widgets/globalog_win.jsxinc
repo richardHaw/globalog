@@ -70,6 +70,7 @@ function CreateViewer(){
     win.margin = 5;
     win.indented = true;
     win.buffer = new Array();
+    win.level = 0;
 
     win.init_width = 300;
     win.init_height = 100;
@@ -109,7 +110,7 @@ function CreateViewer(){
                             readonly:true})
 
     win.multiline.alignment = ["fill", "fill"];
-    win.multiline.minimumSize = [400, 400];
+    win.multiline.minimumSize = [600, 400];
     win.multiline.active = true;
 
     // bottom
@@ -158,21 +159,27 @@ function CreateViewer(){
             switch(this.text){
                 case btn_names[0]:
                     new_contents = orig_buffer.join("\n");
+                    this.window.level = 0;
                     break;
                 case btn_names[1]:
                     new_contents = FilterLines("DBUG", orig_buffer, indented).join("\n");
+                    this.window.level = 1;
                     break;
                 case btn_names[2]:
                     new_contents = FilterLines("INFO", orig_buffer, indented).join("\n");
+                    this.window.level = 2;
                     break;
                 case btn_names[3]:
                     new_contents = FilterLines("WARN", orig_buffer, indented).join("\n");
+                    this.window.level = 3;
                     break;
                 case btn_names[4]:
                     new_contents = FilterLines("EROR", orig_buffer, indented).join("\n");
+                    this.window.level = 4;
                     break;
                 case btn_names[5]:
                     new_contents = FilterLines("CRIT", orig_buffer, indented).join("\n");
+                    this.window.level = 5;
                     break;
             }
             this.window.multiline.text = new_contents;
@@ -190,6 +197,7 @@ function CreateViewer(){
 
     win.chk.onClick = function(){
         this.window.indented = this.value;
+        this.window.buttons[this.window.level].onClick();
     }
 
     // open button

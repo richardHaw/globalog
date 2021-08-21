@@ -23,7 +23,6 @@ betlog.log("cheetaeh");
 betlog.log("ungga");
 betlog.log(betlog.getTime(true));
 
-
 GlobaLogWin();
 GLOBALOG_WIN.populate(betlog.buffer);
 GLOBALOG_WIN.show();
