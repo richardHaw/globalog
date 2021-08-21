@@ -1,18 +1,18 @@
 // @include"source/globalog.jsxinc";
 
 
-var betlog = new GlobaLog();
+var betlog = CreateGlobaLog("C:/Users/richa/Documents/xxx2.txt");
 
 
-betlog.write("ddd",3);
-betlog.write("");
+betlog.log("ddd",3);
+betlog.log("");
 betlog.print(true);
 
-betlog.write("isko",1);
-betlog.write("kalabaw",0);
-betlog.write(betlog.div);
+betlog.log("isko",1);
+betlog.log("kalabaw",0);
+betlog.log(betlog.separator);
 betlog.setLevel(4);
-betlog.write("palitaw");
-betlog.write("ppp");
-betlog.write("clit");
-
+betlog.log("palitaw");
+betlog.log("ppp");
+betlog.log("clit");
+betlog.log(betlog.getTime(true));

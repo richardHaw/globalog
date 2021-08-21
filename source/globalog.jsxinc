@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+
 (function(){
 
 function GlobaLog(){
@@ -34,17 +35,45 @@ function GlobaLog(){
             4 CRIT
     */
 
+    this.handlerPath = null;
+    this.handlerFile = null;
+    this.buffer = new Array();
     this.level = 1;
     this.levelStr = "INFO";
     this.handler = null;
     this.message = "-";
-    this.div = this.charFill("",88,"-");
+    this.separator = this.charFill("",88,"-");
     this.printout = false;
 }
 $.global.GlobaLog = GlobaLog;
 
 
-GlobaLog.prototype.write = function(msg,mlev){
+GlobaLog.prototype.initHandler = function(hpath){
+    if (! hpath instanceof String){
+        throw new Error("Handler path must be text:" + String(hpath));
+    }
+
+    const hfile = new File(hpath);
+    if (! hfile.parent.exists){
+        hfile.parent.create();
+    }
+
+    if (! hfile.parent.exists){
+        throw new Error("Failed to create folder: " + hfile.parent.fsName);
+    }
+
+    this.handlerFile = hfile;
+    this.handlerPath = this.handlerFile.fsName;
+    this.clearBuffer();
+
+    this.writeToFile("");
+    this.writeToFile(this.separator);
+    this.writeToFile("Log Created at " + this.getTime());
+    return this.handlerFile;
+}
+
+
+GlobaLog.prototype.log = function(msg,mlev){
     var msg = (msg !== undefined) ? msg : "";
     var mlev = (mlev !== undefined) ? mlev : this.level;
 
@@ -54,13 +83,32 @@ GlobaLog.prototype.write = function(msg,mlev){
     }
 
     const force_str = String(msg);
-    const full_msg = this.levelStr + this.getTime() + force_str;
+    const full_msg = this.levelStr + " - " + this.getTime() + " " + force_str;
+    this.setLevel(orig_level);
 
     if (this.printout){
         $.writeln(full_msg);
     }
+    this.buffer.push(full_msg);
+    this.writeToFile(full_msg);
+}
 
-    this.setLevel(orig_level);
+
+GlobaLog.prototype.writeToFile = function(msg){
+    if (this.handlerFile === undefined || this.handlerFile === null){
+        return "Handler not specified...";
+    }
+
+    try {
+        this.handlerFile.open("a+");
+        this.handlerFile.encoding = "UTF-8";
+        this.handlerFile.lineFeed = "Windows";
+        this.handlerFile.writeln(msg);
+        this.handlerFile.close();
+    }
+    catch(e){
+        throw new Error("Write failed: " + e.message);
+    }
 }
 
 
@@ -86,6 +134,11 @@ GlobaLog.prototype.setLevel = function(lev_int){
 }
 
 
+GlobaLog.prototype.clearBuffer = function(){
+    this.buffer = new Array();
+}
+
+
 GlobaLog.prototype.print = function(pvar){
     if (! pvar instanceof Boolean){
         throw new Error("Print value should be Boolean: " + String(pvar));
@@ -94,16 +147,24 @@ GlobaLog.prototype.print = function(pvar){
 }
 
 
-GlobaLog.prototype.getTime = function(){
+GlobaLog.prototype.getTime = function(pathsafe){
+    var pathsafe = (pathsafe !== undefined) ? pathsafe : false;
+
     const date = new Date();
 
-    var out = " - " + date.getFullYear() + "/";
+    var out = date.getFullYear() + "/";
     out += this.charFill(date.getMonth() + 1,2) + "/";
     out += this.charFill(date.getDate(),2) + " ";
     out += this.charFill(date.getHours(),2) + ":";
     out += this.charFill(date.getMinutes(),2) + ":";
-    out += this.charFill(date.getSeconds(),2) + " ";
+    out += this.charFill(date.getSeconds(),2);
+
+    if (pathsafe === true){
+        return out.replace(/ /g,"_").replace(/:/g,"_").replace(/\//g,"_");
+    }
+
     return out;
+
 }
 
 
@@ -118,6 +179,20 @@ GlobaLog.prototype.charFill = function(orig_item,num_zeros,pad_ch){
 
     return padded_str;
 }
+
+
+function CreateGlobaLog(path){
+    /*
+    factory
+    */
+
+    const log_obj = new GlobaLog();
+    if (path !== null && path !== undefined){
+        log_obj.initHandler(path);
+    }
+    return log_obj;
+}
+$.global.CreateGlobaLog = CreateGlobaLog;
 
 
 })();
